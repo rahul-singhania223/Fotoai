@@ -1,6 +1,21 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Poppins } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
+import { ClerkProvider } from "@clerk/nextjs";
+import SubscriptionModal from "@/components/models/subscription.modal";
+
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,12 +38,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+    <ClerkProvider>
+      <html
+        lang="en"
+        className={`${poppins.variable} ${inter.variable} ${geistSans.variable} ${geistMono.variable}`}
       >
-        {children}
-      </body>
-    </html>
+        <body className={`${poppins.variable} font-sans  antialiased`}>
+          {children}
+          <Toaster />
+          <SubscriptionModal />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
