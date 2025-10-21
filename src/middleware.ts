@@ -19,9 +19,6 @@ export default clerkMiddleware(async (auth, request) => {
   if (authenticated) {
     if (pathname === "/")
       return NextResponse.rewrite(new URL("/home", request.url));
-
-    if (pathname.startsWith("/auth"))
-      return NextResponse.rewrite(new URL("/home", request.url));
   }
 
   return NextResponse.next();

@@ -14,9 +14,10 @@ export default async function AuthSuccessPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const success_redirect = searchParams.success_redirect || "/";
+  const params = await searchParams;
+  const success_redirect = params.success_redirect || "/";
 
-  const failure_redirect = searchParams.failure_redirect || "/";
+  const failure_redirect = params.failure_redirect || "/";
 
   const user = await currentUser();
 
@@ -31,14 +32,16 @@ export default async function AuthSuccessPage({
     avatar: user.imageUrl,
     user_id: user.id,
     phone: user.phoneNumbers[0]?.phoneNumber,
+    has_subscription: false,
     credits: 20,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
 
-  const dbUser = await createUser(userData);
-  if (!dbUser) {
-    // sign out
+  try {
+    const dbUser = await createUser(userData);
+  } catch (error) {
+    console.log(error);
     return redirect(failure_redirect);
   }
 

@@ -9,6 +9,7 @@ export const createUser = async (user: User) => {
     const newUser = await db.user.create({ data: user });
     return newUser;
   } catch (error) {
+    console.log(error);
     throw error;
   }
 };

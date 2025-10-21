@@ -802,6 +802,7 @@ export default function Studio() {
                 <div className="flex items-center gap-6">
                   {!dbUser.has_subscription && (
                     <Button
+                      onClick={() => openModal('SUBSCRIPTION')}
                       variant={"secondary"}
                       className="text-orange-500 cursor-pointer hover:bg-orange-500/10"
                     >

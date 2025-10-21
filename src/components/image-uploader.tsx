@@ -103,6 +103,7 @@ export default function ImageUploader({ path, className }: Props) {
           {
             "cursor-not-allowed": uploading,
             "!bg-gray-50 !border-gray-400": uploading,
+            "border-blue-500 bg-blue-100": isDragging,
           }
         )}
       >

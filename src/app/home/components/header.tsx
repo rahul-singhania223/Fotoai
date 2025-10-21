@@ -9,10 +9,12 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { getUserByUserId } from "@/queries/db";
 import { Button } from "@/components/ui/button";
+import { useModal } from "@/store/modal.store";
 
 export default function Header() {
   const { user: dbUser, setUser } = useUserStore();
   const { user } = useUser();
+  const { onOpen: openModal } = useModal();
 
   useEffect(() => {
     if (!user) return;
@@ -55,7 +57,11 @@ export default function Header() {
             {dbUser && (
               <div className="flex items-center gap-6">
                 {!dbUser.has_subscription && (
-                  <Button variant={"secondary"} className="text-orange-500 cursor-pointer hover:bg-orange-500/10">
+                  <Button
+                    onClick={() => openModal("SUBSCRIPTION")}
+                    variant={"secondary"}
+                    className="text-orange-500 cursor-pointer hover:bg-orange-500/10"
+                  >
                     <Crown /> Go Pro
                   </Button>
                 )}

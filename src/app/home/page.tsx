@@ -2,7 +2,7 @@
 
 import ImageUploader from "@/components/image-uploader";
 import { Button } from "@/components/ui/button";
-import { getFileUrl } from "@/lib/utils";
+import { deleteFile, getFileUrl } from "@/lib/utils";
 import { useCanvasStore } from "@/store/canvas.store";
 import { useModal } from "@/store/modal.store";
 import { ClerkLoaded, ClerkLoading, useAuth, UserButton } from "@clerk/nextjs";
@@ -17,6 +17,7 @@ import {
   Loader2,
   SquareArrowOutUpRight,
   SunMoon,
+  X,
 } from "lucide-react";
 import ImageComponent from "next/image";
 import Link from "next/link";
@@ -79,32 +80,14 @@ const presets = [
   },
 ];
 
-function getUniqueSmoothColor(index: number) {
-  const smoothColors = [
-    "#F9A8D4", // Pink
-    "#6EE7B7", // Green
-    "#A7F3D0", // Mint
-    "#F3F4F6", // Gray
-    "#93C5FD", // Sky Blue
-    "#FDE68A", // Yellow
-    "#C4B5FD", // Purple
-    "#FCA5A5", // Red
-    "#FDBA74", // Orange
-    "#34D399", // Emerald
-  ];
-  // Cycle through colors if more tools than colors
-  return smoothColors[index % smoothColors.length];
-}
-
 export default function Homepage() {
   const params = useSearchParams();
   const filePath = params.get("file");
 
-  const imageLoadedFromUrl = useRef(false);
-
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [processType, setProcessType] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const {
     backgroundColor,
@@ -119,12 +102,23 @@ export default function Homepage() {
 
   useEffect(() => {
     if (filePath) {
-      if (imageLoadedFromUrl.current) return;
-      imageLoadedFromUrl.current = true;
       const fileUrl = getFileUrl(filePath, "Uploads");
       setImageUrl(fileUrl);
     }
   }, [filePath]);
+
+  const deleteImage = async () => {
+    if (!filePath) return;
+    try {
+      setDeleting(true);
+      const { error } = await deleteFile(filePath, "Uploads");
+      if (error) return toast.error(error.message);
+      setImageUrl(null);
+      return redirect("/home");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const processForPlatform = async (
     imageUrl: string,
@@ -228,7 +222,20 @@ export default function Homepage() {
         <Header />
         <main className="space-y-8 w-full h-[calc(100vh-150px)]">
           {imageUrl ? (
-            <div className="w-full flex flex-col lg:flex-row items-center gap-5 h-full ">
+            <div className="w-full flex flex-col lg:flex-row items-center gap-5 h-full relative ">
+              <Button
+                disabled={processing || deleting}
+                onClick={deleteImage}
+                variant="ghost"
+                size="icon"
+                className="rounded-full cursor-pointer absolute top-0 left-0 z-10"
+              >
+                {deleting ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                ) : (
+                  <X className="w-4 h-4" />
+                )}
+              </Button>
               <div className="w-full h-[35%] flex items-center justify-center p-3 md:p-5 md:h-full md:w-auto md:flex-[0.5] relative">
                 {processing && (
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -243,7 +250,7 @@ export default function Homepage() {
                   className="max-w-full max-h-full object-contain"
                 />
               </div>
-              <div className="w-full h-[55%] md:h-full md:w-auto md:flex-[0.5] flex flex-col justify-end-safe md:justify-start">
+              <div className="w-full h-[55%] md:h-full md:w-auto md:flex-[0.5] flex flex-col justify-end-safe md:justify-center">
                 <div className="flex flex-wrap gap-4 justify-center ">
                   {tools.map((tool, idx) => (
                     <button
