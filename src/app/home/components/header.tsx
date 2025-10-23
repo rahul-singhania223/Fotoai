@@ -24,7 +24,7 @@ export default function Header() {
         const res = await getUserByUserId(user.id);
         if (res.error) {
           console.log(res.error);
-          return toast.error(res.error.message);
+          return toast.error("Couldn't get user data!");
         }
 
         if (res.data) {

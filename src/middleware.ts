@@ -1,8 +1,5 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
-import { NextRequest, NextResponse } from "next/server";
-
-const publicPaths = ["/", "/sign-in", "/sign-up"];
-const privatePaths = ["/dashboard", "/home"];
+import { NextResponse } from "next/server";
 
 export default clerkMiddleware(async (auth, request) => {
   const { userId, isAuthenticated } = await auth();

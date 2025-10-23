@@ -57,7 +57,7 @@ export default function SubscriptionModal() {
             </Button>
 
             <Link
-              href={`/pricing?src=${encodeURIComponent(window.location.href)}`}
+              href={`/pricing`}
             >
               <Button variant={"link"} className="text-lg">Pricing</Button>
             </Link>

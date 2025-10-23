@@ -18,7 +18,7 @@ class Processor {
     }
   }
 
-  async upscale(imageUrl: string, settings: any) {
+  async upscale(imageUrl: string, settings: Settings) {
     try {
       const res = await axios.post("/api/process/upscale", {
         imageUrl,
@@ -30,7 +30,7 @@ class Processor {
     }
   }
 
-  async lightFix(imageUrl: string, settings: any) {
+  async lightFix(imageUrl: string, settings: Settings) {
     try {
       const res = await axios.post("/api/process/light-fix", {
         imageUrl,
@@ -42,7 +42,11 @@ class Processor {
     }
   }
 
-  async processForPlatform(imageUrl: string, dimension: any, format: string) {
+  async processForPlatform(
+    imageUrl: string,
+    dimension: Dimension,
+    format: string
+  ) {
     try {
       const res = await axios.post("/api/process/platform", {
         imageUrl,
