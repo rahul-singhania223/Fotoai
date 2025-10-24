@@ -20,6 +20,7 @@ export const getUserByUserId = async (user_id: string) => {
     const user = await db.user.findUnique({ where: { user_id } });
     return { error: null, data: user };
   } catch (error) {
+    console.log(error);
     return { error, data: null };
   }
 };
