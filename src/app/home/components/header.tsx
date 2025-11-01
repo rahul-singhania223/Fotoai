@@ -22,7 +22,7 @@ export default function Header() {
     if (!dbUser) {
       const getDbUser = async () => {
         const res = await getUserByUserId(user.id);
-        if (res.error) {
+        if (!res.data) {
           console.log(res.error);
           return toast.error("Couldn't get user data!");
         }

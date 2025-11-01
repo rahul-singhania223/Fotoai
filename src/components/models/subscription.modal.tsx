@@ -51,7 +51,7 @@ export default function SubscriptionModal() {
           </div>
 
           <div className="flex flex-col lg:flex-row items-center mt-10 gap-4">
-            <Button className="bg-orange-500 hover:bg-orange-600 w-full lg:w-fit text-lg lg:text-base h-12 lg:h-10">
+            <Button className="  w-full lg:w-fit text-lg lg:text-base h-12 lg:h-10">
               <Crown className="" />
               Upgrade Now
             </Button>
@@ -59,7 +59,7 @@ export default function SubscriptionModal() {
             <Link
               href={`/pricing`}
             >
-              <Button variant={"link"} className="text-lg">Pricing</Button>
+              <Button variant={"link"} className="">Pricing</Button>
             </Link>
           </div>
         </div>

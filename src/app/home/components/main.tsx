@@ -3,7 +3,7 @@
 import ImageUploader from "@/components/image-uploader";
 import { useEffect, useState } from "react";
 import { ImagePreview } from "./image-preview";
-import { redirect, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Download,
   Eraser,
@@ -18,6 +18,7 @@ import ImageComponent from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getFileUrl } from "@/lib/utils";
+import { toast } from "sonner";
 
 const tools = [
   {
@@ -78,6 +79,7 @@ export function MainComponent() {
   const [processType, setProcessType] = useState<string | null>(null);
 
   const searchParams = useSearchParams();
+  const router = useRouter();
   const filePath = searchParams.get("file");
 
   const { onOpen: openModal } = useModal();
@@ -89,6 +91,8 @@ export function MainComponent() {
     setDimensions,
     dimensions,
     setFormat,
+    setOriginalDimensions,
+    originalDimensions,
   } = useCanvasStore();
 
   const processImage = async (processType: string, settings?: any) => {
@@ -101,16 +105,20 @@ export function MainComponent() {
         settings,
       });
 
+      console.log(res.data);
+
       const outputPath = res.data.data.output.result_path;
-      return redirect(`/home?file=${outputPath}`);
+      return router.push(`/home?file=${outputPath}`);
     } catch (err: any) {
-      const code = err.response.data.code || "INTERNAL_SERVER_ERROR";
-      const message = err.response.data.message || "Something went wrong!";
+      const code = err.response?.data?.code || "INTERNAL_SERVER_ERROR";
+      const message = err.response?.data?.message || "Something went wrong!";
 
       if (code === "INSUFFICIENT_CREDITS") {
         // open payment modal
         openModal("SUBSCRIPTION");
       }
+      console.log(err);
+      toast.error("Operation Failed!", { description: message });
     } finally {
       setProcessing(false);
     }
@@ -136,15 +144,18 @@ export function MainComponent() {
       });
 
       const outputPath = res.data.data.output.result_path;
-      return redirect(`/home?file=${outputPath}`);
+      return router.push(`/home?file=${outputPath}`);
     } catch (err: any) {
-      const code = err.response.data.code || "INTERNAL_SERVER_ERROR";
-      const message = err.response.data.message || "Something went wrong!";
+      const code = err.response?.data?.code || "INTERNAL_SERVER_ERROR";
+      const message = err.response?.data?.message || "Something went wrong!";
 
       if (code === "INSUFFICIENT_CREDITS") {
         // open payment modal
         openModal("SUBSCRIPTION");
       }
+
+      console.log(err);
+      toast.error("Operation Failed!", { description: message });
     } finally {
       setProcessing(false);
     }
@@ -152,36 +163,25 @@ export function MainComponent() {
 
   const handleDownload = async () => {
     if (!imageUrl) return;
-    if (processing || !dimensions) return;
+    if (processing) return;
 
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
+
     if (!ctx) return;
 
-    canvas.width = dimensions.width;
-    canvas.height = dimensions.height;
-
-    // add background
-    if (backgroundColor) {
-      ctx.fillStyle = backgroundColor;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-
     const image = new Image();
-    image.src = imageUrl;
     image.crossOrigin = "anonymous";
+    image.src = imageUrl;
+
     image.onload = () => {
-      const imgW = dimensions.width * 0.8;
-      const scale = imgW / image.width;
-      const imgH = image.height * scale;
-
-      const x = (canvas.width - imgW) / 2;
-      const y = (canvas.height - imgH) / 2;
-
-      ctx.drawImage(image, x, y, imgW, imgH);
+      canvas.width = image.width;
+      canvas.height = image.height;
+      ctx.drawImage(image, 0, 0);
       const link = document.createElement("a");
-      link.download = "image." + format;
-      link.href = canvas.toDataURL("image/" + format);
+      const outputFormat = filePath?.split(".")?.pop() || "jpg";
+      link.download = "image." + outputFormat;
+      link.href = canvas.toDataURL("image/" + outputFormat);
       link.click();
     };
   };

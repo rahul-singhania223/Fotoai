@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import runpod from "@/config/runpod";
 import { isValidUrl } from "@/lib/utils";
 import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
+import axios from "axios";
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,15 +59,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!runpod)
-      return NextResponse.json(
-        {
-          success: false,
-          code: "RUNPOD_ERROR",
-          message: "Runpod not initialized",
-        },
-        { status: 500 }
-      );
+    const url = process.env.RUNPOD_URL! + "/runsync";
+    const RUNPOD_API_KEY = process.env.RUNPOD_API_KEY!;
 
     const input = {
       input: {
@@ -80,17 +73,12 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    const response = await runpod.runSync(input);
-    if (!response)
-      return NextResponse.json(
-        {
-          success: false,
-          code: "RUNPOD_ERROR",
-          message: "Operation failed!",
-          data: response,
-        },
-        { status: 500 }
-      );
+    const response = await axios.post(url, input, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${RUNPOD_API_KEY}`,
+      },
+    });
 
     // update user credits
     await db.user.update({
@@ -103,7 +91,8 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error: any) {
-    console.log(error.message);
+    console.log(error);
+    console.log(error.response);
     return NextResponse.json(
       {
         success: false,

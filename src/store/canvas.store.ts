@@ -5,10 +5,11 @@ interface CanvasState {
   backgroundImage: string | null;
   backgroundColor: string | null;
   dimensions: { width: number; height: number } | null;
-  imageDimensions : { width: number; height: number } | null;
+  imageDimensions: { width: number; height: number } | null;
   format: string | null;
   imageSrc: string | null;
   processing: boolean;
+  originalDimensions: { width: number; height: number } | null;
   setProcessing: (processing: boolean) => void;
   setFormat: (format: string) => void;
   setImageSrc: (imageUrl: string | null) => void;
@@ -16,7 +17,8 @@ interface CanvasState {
   setBackgroundColor: (color: string | null) => void;
   setDimensions: (width: number, height: number) => void;
   setImageDimensions: (width: number, height: number) => void;
-
+  setOriginalDimensions: (width: number, height: number) => void;
+  clear: () => void;
 }
 
 export const useCanvasStore = create<CanvasState>()(
@@ -29,6 +31,7 @@ export const useCanvasStore = create<CanvasState>()(
       format: null,
       imageSrc: null,
       processing: false,
+      originalDimensions: null,
       setProcessing: (processing: boolean) => set({ processing }),
       setImageSrc: (imageUrl: string | null) => set({ imageSrc: imageUrl }),
       setFormat: (format: string) => set({ format }),
@@ -40,6 +43,18 @@ export const useCanvasStore = create<CanvasState>()(
         set({ backgroundImage: imageUrl }),
       setBackgroundColor: (color: string | null) =>
         set({ backgroundColor: color }),
+      setOriginalDimensions: (width: number, height: number) =>
+        set({ originalDimensions: { width, height } }),
+      clear: () =>
+        set({
+          backgroundImage: null,
+          backgroundColor: null,
+          dimensions: null,
+          imageDimensions: null,
+          format: null,
+          imageSrc: null,
+          processing: false,
+        }),
     }),
     {
       name: "canvas-storage", // name of item in localStorage

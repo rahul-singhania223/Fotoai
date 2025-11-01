@@ -2,9 +2,10 @@ import { Button } from "@/components/ui/button";
 import { deleteFile } from "@/lib/utils";
 import { Loader2, X } from "lucide-react";
 import { redirect } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import ImageComponent from "next/image";
+import { useCanvasStore } from "@/store/canvas.store";
 
 interface ImagePreviewProps {
   processing: boolean;
@@ -18,6 +19,11 @@ export const ImagePreview = ({
   filePath,
 }: ImagePreviewProps) => {
   const [deleting, setDeleting] = useState(false);
+
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const { originalDimensions, dimensions } = useCanvasStore();
 
   const deleteImage = async () => {
     if (!filePath) return;
@@ -52,6 +58,7 @@ export const ImagePreview = ({
             <Loader2 className="w-7 h-7 animate-spin text-muted-foreground" />
           </div>
         )}
+
         <ImageComponent
           src={imageUrl}
           alt="uploaded image"

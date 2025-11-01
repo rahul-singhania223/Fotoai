@@ -1,11 +1,12 @@
 "use client";
 
-import { cn, uploadFileToSupabase } from "@/lib/utils";
+import { cn, getFileUrl, uploadFileToSupabase } from "@/lib/utils";
 import { ImagePlus, Loader2 } from "lucide-react";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
+import { useCanvasStore } from "@/store/canvas.store";
 
 interface Props {
   className?: string;
@@ -13,11 +14,18 @@ interface Props {
 }
 
 export default function ImageUploader({ path, className }: Props) {
+  const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
   const uploadContainerRef = useRef<HTMLLabelElement>(null);
+
+  const {
+    clear: clearCanvas,
+    setOriginalDimensions,
+    setFormat,
+  } = useCanvasStore();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -79,7 +87,17 @@ export default function ImageUploader({ path, className }: Props) {
 
           if (error) return toast.error(error.message);
 
-          return redirect(`/${path || "studio"}?file=${data?.path}`);
+          clearCanvas();
+          if (data.path) {
+            const imageUrl = getFileUrl(data.path, "Uploads");
+            const image = new Image();
+            image.src = imageUrl;
+            image.onload = () => {
+              setOriginalDimensions(image.width, image.height);
+              setFormat(data.path.split(".")?.pop() || "jpg");
+              return router.push(`/${path || "studio"}?file=${data?.path}`);
+            };
+          }
         } finally {
           setUploading(false);
         }

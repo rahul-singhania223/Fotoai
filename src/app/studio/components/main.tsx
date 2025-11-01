@@ -18,9 +18,11 @@ import { ToolsList } from "./tool-list";
 import axios from "axios";
 import { toast } from "sonner";
 import { useModal } from "@/store/modal.store";
+import { useRouter } from "next/router";
 
 export const Main = () => {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const filePath = searchParams.get("file");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [openController, setOpenController] = useState(false);
@@ -58,12 +60,12 @@ export const Main = () => {
         settings,
       });
 
-      if (!res.data.success) return toast.error("Operation Failed!");
+      const outputPath = res.data.data.output.result_path;
 
-      return redirect("/studio?file=" + res.data.data.output.result_path);
+      return router.push("/studio?file=" + outputPath);
     } catch (err: any) {
-      const code = err.response.data.code || "INTERNAL_SERVER_ERROR";
-      const message = err.response.data.message || "Something went wrong!";
+      const code = err.response?.data?.code || "INTERNAL_SERVER_ERROR";
+      const message = err.response?.data?.message || "Something went wrong!";
 
       if (code === "INSUFFICIENT_CREDITS") {
         // open payment modal
@@ -71,6 +73,7 @@ export const Main = () => {
       }
 
       console.log(err);
+      toast.error("Operation Failed!", { description: message });
     } finally {
       setProcessing(false);
     }
